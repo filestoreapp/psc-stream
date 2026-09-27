@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSC Stream</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand" id="brand-home">▶ <span>PSC Stream</span></div>
+  <nav class="nav">
+    <button class="nav-btn" id="nav-library" data-view="library">Library</button>
+    <button class="nav-btn" id="nav-settings" data-view="settings">Settings</button>
+  </nav>
+  <div class="topbar-right">
+    <span id="mock-badge" class="badge hidden">MOCK</span>
+    <span id="net-status" class="status-dot" title="connection"></span>
+  </div>
+</header>
+
+<main>
+  <!-- ============ LOGIN WIZARD ============ -->
+  <section id="view-login" class="view">
+    <div class="wizard">
+      <h1>Welcome to PSC Stream</h1>
+      <p class="muted">Sign in with your Telegram account to stream your own study videos.</p>
+      <div id="login-error" class="error hidden"></div>
+
+      <div class="step" id="step-1">
+        <h2>Step 1 — Telegram API credentials</h2>
+        <p class="muted small">Get these once at
+          <a href="https://my.telegram.org" target="_blank" rel="noopener">my.telegram.org</a>
+          (log in → API development tools → create an app).</p>
+        <label>api_id <input id="in-api-id" inputmode="numeric" placeholder="e.g. 1234567" autocomplete="off"></label>
+        <label>api_hash <input id="in-api-hash" placeholder="32-char hash" autocomplete="off" spellcheck="false"></label>
+        <label>Phone number <input id="in-phone" placeholder="+919876543210" autocomplete="tel"></label>
+        <button class="btn primary" id="btn-send-code">Send login code</button>
+      </div>
+
+      <div class="step hidden" id="step-2">
+        <h2>Step 2 — Login code</h2>
+        <p class="muted small">Telegram sent a code to your app. Enter it below.</p>
+        <label>Code <input id="in-code" inputmode="numeric" placeholder="12345" autocomplete="one-time-code"></label>
+        <div class="row">
+          <button class="btn" id="btn-back-1">Back</button>
+          <button class="btn primary" id="btn-verify-code">Verify</button>
+        </div>
+      </div>
+
+      <div class="step hidden" id="step-3">
+        <h2>Step 3 — Two-step verification</h2>
+        <p class="muted small">Your account has 2FA enabled. Enter your password.</p>
+        <label>Password <input id="in-password" type="password" placeholder="2FA password" autocomplete="current-password"></label>
+        <div class="row">
+          <button class="btn" id="btn-back-2">Back</button>
+          <button class="btn primary" id="btn-verify-password">Sign in</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LIBRARY ============ -->
+  <section id="view-library" class="view hidden">
+    <div class="library-head">
+      <h1>My Study Videos <span id="lib-count" class="muted small"></span></h1>
+      <div class="library-tools">
+        <input id="search" placeholder="Search titles…" autocomplete="off">
+        <button class="btn" id="btn-rescan-lib">↻ Rescan</button>
+      </div>
+    </div>
+    <div id="scan-note" class="note hidden"></div>
+    <div id="grid" class="grid"></div>
+    <div class="center"><button class="btn hidden" id="btn-more">Load more</button></div>
+    <div id="empty-lib" class="empty hidden">
+      <p>No videos yet.</p>
+      <p class="muted small">Set your channel in Settings, then press Rescan.</p>
+    </div>
+  </section>
+
+  <!-- ============ WATCH ============ -->
+  <section id="view-watch" class="view hidden">
+    <button class="btn" id="btn-back-watch">← Back to library</button>
+    <h1 id="watch-title"></h1>
+    <p class="muted small" id="watch-meta"></p>
+    <div class="player-wrap">
+      <video id="player" controls autoplay preload="metadata" playsinline></video>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section id="view-settings" class="view hidden">
+    <div class="wizard">
+      <h1>Settings</h1>
+      <div id="settings-error" class="error hidden"></div>
+      <div id="settings-ok" class="ok hidden"></div>
+
+      <h2>Telegram channel</h2>
+      <p class="muted small">Your private channel where the study videos are uploaded.
+        Accepts <code>@username</code>, a <code>t.me/…</code> link, or a private invite link
+        (<code>t.me/+…</code>).</p>
+      <label>Channel <input id="in-channel" placeholder="@mystudyvideos or https://t.me/+abcd1234" autocomplete="off" spellcheck="false"></label>
+      <div class="row">
+        <button class="btn primary" id="btn-save-channel">Save channel</button>
+        <button class="btn" id="btn-rescan">↻ Rescan now</button>
+      </div>
+      <div id="scan-status" class="muted small"></div>
+
+      <h2>Session</h2>
+      <p class="muted small">Log out to remove the saved Telegram session from this laptop.</p>
+      <button class="btn danger" id="btn-logout">Log out</button>
+
+      <h2>About</h2>
+      <p class="muted small">PSC Stream streams your own Telegram channel videos straight to this
+        player. Video bytes are kept in memory only — nothing is saved to disk.</p>
+    </div>
+  </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

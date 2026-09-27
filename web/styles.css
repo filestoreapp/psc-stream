@@ -1,0 +1,221 @@
+/* PSC Stream — dark Netflix-like theme. No build step, plain CSS. */
+
+:root {
+  --bg: #0b0e14;
+  --bg2: #11151f;
+  --card: #161b26;
+  --card2: #1d2432;
+  --text: #e8ecf5;
+  --muted: #9aa3b5;
+  --accent: #e50914;
+  --accent2: #f6121d;
+  --line: #232a3a;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+a { color: #6aa6ff; }
+
+/* ---------- top bar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 24px;
+  background: rgba(11, 14, 20, 0.92);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.brand span { color: var(--text); font-weight: 700; }
+
+.nav { display: flex; gap: 8px; }
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.nav-btn:hover { color: var(--text); background: var(--card); }
+.nav-btn.active { color: var(--text); background: var(--card2); }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.badge {
+  background: #7a5c00;
+  color: #ffe27a;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+.status-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #666;
+}
+.status-dot.ok { background: #2ecc71; }
+.status-dot.bad { background: var(--accent); }
+
+/* ---------- layout ---------- */
+main { max-width: 1280px; margin: 0 auto; padding: 24px; }
+.view.hidden, .hidden { display: none !important; }
+
+/* ---------- wizard / forms ---------- */
+.wizard { max-width: 560px; margin: 24px auto; }
+.wizard h1 { margin-bottom: 4px; }
+.wizard h2 { margin-top: 28px; font-size: 18px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+label { display: block; margin: 14px 0; font-size: 14px; }
+input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 15px;
+}
+input:focus { outline: none; border-color: var(--accent); }
+
+.btn {
+  background: var(--card2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.btn:hover { background: #263044; }
+.btn.primary { background: var(--accent); border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover { background: var(--accent2); }
+.btn.danger { background: transparent; border-color: var(--accent); color: #ff8a8f; }
+.btn:disabled { opacity: 0.55; cursor: wait; }
+.row { display: flex; gap: 10px; margin-top: 8px; }
+
+.error {
+  background: #3a1215;
+  border: 1px solid #7a1f24;
+  color: #ffb3b7;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+.ok {
+  background: #123a1e;
+  border: 1px solid #1f7a36;
+  color: #a9e8bd;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+.note {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* ---------- library grid ---------- */
+.library-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.library-head h1 { margin: 0; font-size: 24px; }
+.library-tools { display: flex; gap: 10px; }
+.library-tools input { width: 240px; margin: 0; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.card:hover { transform: translateY(-3px); border-color: #3a4566; }
+.card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  background: var(--bg2);
+}
+.card-body { padding: 10px 12px 12px; }
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
+}
+.card-meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+.center { text-align: center; margin: 28px 0; }
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+/* ---------- watch view ---------- */
+.player-wrap {
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin-top: 12px;
+}
+video {
+  width: 100%;
+  max-height: 72vh;
+  display: block;
+  background: #000;
+}
+#view-watch h1 { font-size: 20px; margin: 14px 0 2px; }
+
+@media (max-width: 640px) {
+  main { padding: 16px; }
+  .library-tools input { width: 100%; }
+  .library-tools { width: 100%; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+}

@@ -1,0 +1,7 @@
+# PSC Stream dependencies (Windows / Python 3.11+)
+# telethon: MTProto client (login, channel scan, chunk streaming)
+# pycryptodome: crypto backend for telethon
+# pywebview: desktop window (uses the built-in WebView2 on Windows 10/11)
+telethon>=1.37
+pycryptodome>=3.18
+pywebview>=4.4
