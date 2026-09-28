@@ -8,7 +8,10 @@ Telegram's servers — **nothing is saved to disk** (video bytes live in memory 
 
 1. You upload your study videos to your own **private Telegram channel**.
 2. PSC Stream logs in to *your* Telegram account via MTProto (Telethon).
-3. It scans the channel for videos and shows them as a browsable library.
+3. It scans the channel for videos — both messages Telegram classifies as video
+   *and* video files sent as documents (e.g. via "Send as file", MKV files).
+   Plain non-video documents like PDFs are skipped, since the player streams
+   video only. Matches show up as a browsable library.
 4. Pressing play streams the video with HTTP Range requests (206 partial content),
    exactly like YouTube/Netflix buffering — no full download.
 

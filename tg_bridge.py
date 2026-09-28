@@ -207,12 +207,17 @@ class TelegramBridge:
         except Exception as exc:
             raise _map_error(exc)
 
-    def _meta_from_msg(self, msg):
+    def _meta_from_msg(self, msg, require_video=False):
         media = getattr(msg, "media", None)
         if not isinstance(media, types.MessageMediaDocument):
             return None
         doc = media.document
         if not isinstance(doc, types.Document):
+            return None
+        # Documents pass: only keep it if it's actually a video (e.g. a movie
+        # file sent via "Send as file", MKV, etc.). Plain PDFs/ZIPs are skipped
+        # because the player can only stream video.
+        if require_video and not self._is_video_doc(doc):
             return None
         self._docs[msg.id] = doc
         # Title: first line of the caption, else the file name, else fallback.
@@ -240,6 +245,15 @@ class TelegramBridge:
         }
         self._meta[msg.id] = meta
         return meta
+
+    @staticmethod
+    def _is_video_doc(doc):
+        if (getattr(doc, "mime_type", None) or "").lower().startswith("video/"):
+            return True
+        return any(
+            isinstance(a, types.DocumentAttributeVideo)
+            for a in getattr(doc, "attributes", [])
+        )
 
     # -- auth ---------------------------------------------------------------
     async def _auth_start(self, api_id, api_hash, phone):
@@ -313,17 +327,30 @@ class TelegramBridge:
 
     async def _scan_page(self, offset_id, limit):
         entity = await self._ensure_entity()
+        seen = set()
         out = []
+        # Pass 1: messages Telegram classifies as video.
+        # Pass 2: documents that are actually videos (files sent via
+        # "Send as file", MKV files, etc.). Plain PDFs/ZIPs are skipped.
         # iter_messages is sync and returns an async iterator.
-        async for msg in self._client.iter_messages(
-            entity,
-            filter=types.InputMessagesFilterVideo,
-            limit=limit,
-            offset_id=offset_id,
+        for flt, require_video in (
+            (types.InputMessagesFilterVideo, False),
+            (types.InputMessagesFilterDocument, True),
         ):
-            meta = self._meta_from_msg(msg)
-            if meta:
-                out.append(meta)
+            async for msg in self._client.iter_messages(
+                entity,
+                filter=flt,
+                limit=limit,
+                offset_id=offset_id,
+            ):
+                if msg.id in seen:
+                    continue
+                meta = self._meta_from_msg(msg, require_video=require_video)
+                if meta:
+                    seen.add(msg.id)
+                    out.append(meta)
+        # Newest first across both passes (ids grow with time).
+        out.sort(key=lambda m: m["id"], reverse=True)
         return out
 
     async def _get_video(self, msg_id):
