@@ -54,6 +54,11 @@ Run `build_exe.bat` **on the Windows machine** — PyInstaller cannot cross-comp
 from Linux/macOS, so the exe must be built where it will run. The result is
 `dist\PSC Stream.exe`: copy it anywhere and double-click.
 
+## Updating
+Double-click **`update.bat`** any time — it downloads the latest version from
+GitHub and installs it over your folder. Your `.venv`, login, channel and
+library are all kept. Then start the app again with `run.bat`.
+
 ## Where things are stored
 
 All local data lives in `%LOCALAPPDATA%\PSCStream\` on Windows
