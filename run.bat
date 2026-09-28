@@ -12,9 +12,13 @@ if not exist ".venv\Scripts\python.exe" (
   ) else (
     python -m venv .venv
   )
-  if errorlevel 1 (
+  if not exist ".venv\\Scripts\\python.exe" (
     echo [PSC Stream] ERROR: could not create the virtual environment.
-    echo Install Python 3.11+ from https://www.python.org/downloads/ and tick "Add python.exe to PATH".
+    echo.
+    echo Python 3.11 or newer is not installed. Fix it with ONE of these:
+    echo   1. Open Command Prompt and run:  py install 3.11
+    echo   2. Or install from https://www.python.org/downloads/ (tick "Add python.exe to PATH")
+    echo Then delete the .venv folder if one was created, and run this file again.
     pause
     exit /b 1
   )
