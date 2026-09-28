@@ -99,6 +99,10 @@ In mock mode any login code with 4+ characters works; code `00000` triggers the
   pause a few seconds to let the buffer fill.
 - **Blank window** — if pywebview can't start, the console prints a
   `http://127.0.0.1:PORT/` URL; open it in Chrome/Edge instead.
+- **Exe crashes with "No module named 'telethon'"** — the build didn't bundle
+  telethon. Fixed in the current `build_exe.bat` (it now packs telethon and
+  Crypto explicitly and verifies them before building): run `update.bat`, then
+  `build_exe.bat` again.
 - **Antivirus flags the exe** — expected for PyInstaller onefile builds; it's
   your own build from this source, so allow it / add an exclusion.
 
