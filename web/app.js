@@ -218,6 +218,8 @@ function openWatch(v) {
   player.pause();
   player.removeAttribute("src");
   player.load();
+  state.current = v;
+  hideError("vlc-msg");
   $("watch-title").textContent = v.title;
   $("watch-meta").textContent = [fmtDuration(v.duration), fmtSize(v.size), v.date]
     .filter(Boolean).join(" · ");
@@ -232,7 +234,36 @@ $("btn-back-watch").onclick = () => {
   player.pause();
   player.removeAttribute("src");
   player.load();
+  state.current = null;
   showView("library");
+};
+
+$("btn-vlc").onclick = async () => {
+  if (!state.current) return;
+  hideError("vlc-msg");
+  const msg = $("vlc-msg");
+  msg.classList.remove("hidden");
+  msg.innerHTML = "";
+  msg.appendChild(document.createTextNode("Opening in VLC…"));
+  try {
+    await post("/api/open-vlc", { id: state.current.id });
+    msg.textContent = "Playing in VLC — pick subtitles and audio tracks from VLC's menus.";
+  } catch (e) {
+    if (e.code === "vlc_not_found") {
+      msg.innerHTML = "";
+      msg.appendChild(document.createTextNode(
+        "VLC is not installed. Get it free from "));
+      const a = document.createElement("a");
+      a.href = "https://www.videolan.org/vlc/";
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "videolan.org";
+      msg.appendChild(a);
+      msg.appendChild(document.createTextNode(" , then try again."));
+    } else {
+      showError("vlc-msg", "Couldn't open VLC: " + e.message);
+    }
+  }
 };
 
 /* ---------------- settings ---------------- */

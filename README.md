@@ -59,6 +59,14 @@ Double-click **`update.bat`** any time — it downloads the latest version from
 GitHub and installs it over your folder. Your `.venv`, login, channel and
 library are all kept. Then start the app again with `run.bat`.
 
+## VLC playback (subtitles & audio tracks)
+The built-in web player is fine for quick watching, but browsers can't switch
+audio tracks. For full control, press **▶ Open in VLC** on the player page —
+the video streams straight into VLC (via this app's local server, so seeking
+works), where you can pick subtitle and audio tracks from VLC's
+Subtitle / Audio menus. Requires the free [VLC media player](https://www.videolan.org/vlc/)
+to be installed; the app tells you if it's missing.
+
 ## Where things are stored
 
 All local data lives in `%LOCALAPPDATA%\PSCStream\` on Windows

@@ -24,6 +24,8 @@ Stdlib only (ThreadingHTTPServer) so PyInstaller packaging stays trivial.
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import threading
 from collections import OrderedDict
@@ -41,6 +43,42 @@ CACHE_MAX_BYTES = 128 * 1024 * 1024  # in-memory video chunk cache cap
 WRITE_CHUNK = 1024 * 1024  # how much we hand to the socket per write
 
 MOCK = os.environ.get("PSC_STREAM_MOCK") == "1"
+
+
+def find_vlc():
+    """Return the path to vlc(.exe), or None if VLC is not installed.
+
+    Checked: PATH, the standard Windows install locations, and the
+    uninstall registry key. Only these trusted locations are ever launched.
+    """
+    found = shutil.which("vlc") or shutil.which("vlc.exe")
+    if found:
+        return found
+    if os.name == "nt":
+        progfiles = os.environ.get("ProgramFiles", r"C:\Program Files")
+        progfiles_x86 = os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")
+        for base in (progfiles, progfiles_x86):
+            cand = os.path.join(base, "VideoLAN", "VLC", "vlc.exe")
+            if os.path.isfile(cand):
+                return cand
+        try:
+            import winreg
+            for root, sub in (
+                (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\VideoLAN\VLC"),
+                (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\VideoLAN\VLC"),
+                (winreg.HKEY_CURRENT_USER, r"SOFTWARE\VideoLAN\VLC"),
+            ):
+                try:
+                    with winreg.OpenKey(root, sub) as key:
+                        d, _ = winreg.QueryValueEx(key, "InstallDir")
+                    cand = os.path.join(d, "vlc.exe")
+                    if os.path.isfile(cand):
+                        return cand
+                except OSError:
+                    continue
+        except ImportError:
+            pass
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -227,6 +265,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.api_set_channel()
             if path == "/api/rescan":
                 return self.api_rescan()
+            if path == "/api/open-vlc":
+                return self.api_open_vlc()
             return self._err("not_found", "Unknown endpoint", status=404)
         except BridgeError as exc:
             self._bridge_err(exc)
@@ -358,6 +398,48 @@ class Handler(BaseHTTPRequestHandler):
         thread = threading.Thread(target=srv.run_rescan, daemon=True)
         thread.start()
         self._json({"ok": True, "started": True})
+
+    def api_open_vlc(self):
+        """Launch installed VLC playing this video's stream.
+
+        Browsers can't switch audio tracks, so for subtitle/audio-track
+        selection we hand playback to real VLC. The stream URL is served by
+        this same server (Range-capable), so VLC can seek like normal.
+        """
+        body = self._read_json()
+        if body is None:
+            return self._err("bad_request", "Invalid JSON body.")
+        try:
+            msg_id = int(body.get("id"))
+        except (TypeError, ValueError):
+            return self._err("bad_request", "Missing video id.")
+        srv = self.server
+        meta = srv.find_video(msg_id)
+        if meta is None:
+            return self._err("not_found", "Video not found in the library.", status=404)
+        vlc = find_vlc()
+        if not vlc:
+            return self._err(
+                "vlc_not_found",
+                "VLC media player is not installed on this computer.",
+                status=404,
+                extra={"download": "https://www.videolan.org/vlc/"},
+            )
+        port = srv.server_address[1]
+        url = "http://127.0.0.1:%d/api/stream/%d" % (port, msg_id)
+        try:
+            subprocess.Popen(
+                [vlc, url, "--meta-title", meta.get("title") or "PSC Stream"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception as exc:
+            return self._err(
+                "vlc_launch_failed",
+                "Could not start VLC: %s" % exc,
+                status=500,
+            )
+        self._json({"ok": True})
 
     def api_videos(self, query):
         try:
